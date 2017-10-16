@@ -18,9 +18,10 @@ const createList = function(numberOfElement: number) {
   })
 
 }
-const list = createList(1000)
+const list1 = createList(1000)
+const list2 = createList(1000)
 
-// Rendering with children
+// Example one: externally sized container
 ReactDOM.render(
   <ReactFinite 
     initialNumberOfDisplayedChildren={20}
@@ -29,11 +30,29 @@ ReactDOM.render(
     className="list" // Optional
     debug={false} // Don't set it to true in production
   >
-    {list.map((listElement, i) => 
+    {list1.map((listElement, i) => 
       <div key={i} className={`listElement ${i % 2 === 0 ? "listEven" : "listOdd"}`}>
         {i}: {listElement.text}
       </div>
     )}
   </ReactFinite>,
-  document.querySelector("#exampleRoot")
+  document.querySelector("#exampleOneRoot")
+)
+
+// Example two: window scrolling container
+ReactDOM.render(
+  <ReactFinite 
+    initialNumberOfDisplayedChildren={20}
+    safetyMarginInPixels={600} // Optional
+    useWindowForVisibilityDetection={true} // Optional
+    className="list" // Optional
+    debug={false} // Don't set it to true in production
+  >
+    {list1.map((listElement, i) => 
+      <div key={i} className={`listElement ${i % 2 === 0 ? "listEven" : "listOdd"}`}>
+        {i}: {listElement.text}
+      </div>
+    )}
+  </ReactFinite>,
+  document.querySelector("#exampleTwoRoot")
 )

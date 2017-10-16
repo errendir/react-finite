@@ -223,14 +223,23 @@ var createList = function (numberOfElement) {
         return { text: Array.from(new Array(wordCount)).map(function (_) { return randomWord(); }).join(' ') };
     });
 };
-var list = createList(1000);
-// Rendering with children
+var list1 = createList(1000);
+var list2 = createList(1000);
+// Example one: externally sized container
 ReactDOM.render(React.createElement(ReactFinite, { initialNumberOfDisplayedChildren: 20, safetyMarginInPixels: 600, useWindowForVisibilityDetection: false, className: "list" // Optional
-    , debug: false }, list.map(function (listElement, i) {
+    , debug: false }, list1.map(function (listElement, i) {
     return React.createElement("div", { key: i, className: "listElement " + (i % 2 === 0 ? "listEven" : "listOdd") },
         i,
         ": ",
         listElement.text);
-})), document.querySelector("#exampleRoot"));
+})), document.querySelector("#exampleOneRoot"));
+// Example two: window scrolling container
+ReactDOM.render(React.createElement(ReactFinite, { initialNumberOfDisplayedChildren: 20, safetyMarginInPixels: 600, useWindowForVisibilityDetection: true, className: "list" // Optional
+    , debug: false }, list1.map(function (listElement, i) {
+    return React.createElement("div", { key: i, className: "listElement " + (i % 2 === 0 ? "listEven" : "listOdd") },
+        i,
+        ": ",
+        listElement.text);
+})), document.querySelector("#exampleTwoRoot"));
 
 }(React,ReactDOM));

@@ -1,10 +1,14 @@
 body {
+  font-family: "Open Sans", sans-serif;  
   margin: 0px;
   padding: 10px;
   font-size: 20pt;
   width: 100vw;
-  height: 100vh;
   box-sizing: border-box;
+}
+
+h2 {
+  margin: 0.3em 0em;
 }
 
 .topGrid {
@@ -12,10 +16,10 @@ body {
   height: 100%;
   display: grid;
   grid-template-rows: auto 1fr;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(100px, .1fr) 0.9fr;
   grid-template-areas: 
-    "header"
-    "content"
+    "header header"
+    "sidebar content"
 }
 
 .header {
@@ -29,8 +33,16 @@ body {
   min-height: 0; /* Or overflow: hidden; */
 }
 
+#exampleOneRoot {
+  height: 400px;
+}
+
+#exampleTwoRoot {
+
+}
+
 .list {
-  width: 400px;
+  width: calc(100% - 100px);
   height: 100%;
   overflow-y: auto;
 }
@@ -47,7 +59,3 @@ body {
 .listOdd {
   background: #CCC;
 }
-
-/* .listElement:nth-child(2n+1) {
-  background: #EEE;
-} */
