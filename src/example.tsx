@@ -6,7 +6,7 @@ import { ReactFinite } from './index'
 function sample<T>(array: T[]) { return array[Math.floor(array.length*Math.random())] }
 
 const randomWord = () => {
-  const words = ["here", "are", "random", "words", "so", "many", "of", "them", "truly", "believe", "me", "about", "this"]
+  const words = ["here", "are", "the", "random", "words", "so", "many", "of", "them", "truly", "believe", "me", "about", "this"]
   return sample(words)
 }
 

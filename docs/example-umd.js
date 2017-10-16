@@ -43,10 +43,7 @@ var ReactFinite = /** @class */ (function (_super) {
     function ReactFinite(props) {
         var _this = _super.call(this, props) || this;
         _this.heightsOfInvisibleFrontBlocks = [];
-        _this.heightOfInvisibleFrontChildren = 0; // This is always the sum of the prev array, cached for performance
         _this.heightsOfInvisibleBackBlocks = []; // TODO: Initialize to some sensible value or let the user pass it
-        _this.heightOfInvisibleBackChildren = 0;
-        _this.compensateHeight = 0;
         _this.container = null;
         _this.scrollContent = null;
         _this.blocksByBlockId = {};
@@ -125,16 +122,11 @@ var ReactFinite = /** @class */ (function (_super) {
             if (block !== undefined && block !== null) {
                 var height = block.offsetHeight;
                 this.heightsOfInvisibleFrontBlocks.push(height);
-                this.heightOfInvisibleFrontChildren += height;
             }
         }
         for (var blockId = nextState.childrenBlocksStartIndex; blockId < this.state.childrenBlocksStartIndex; ++blockId) {
             var height = this.heightsOfInvisibleFrontBlocks.pop();
-            if (height !== undefined) {
-                this.heightOfInvisibleFrontChildren -= height;
-                this.compensateHeight += height;
-            }
-            else {
+            if (height === undefined) {
                 throw new Error("The previous block height must be known");
             }
         }
@@ -143,14 +135,10 @@ var ReactFinite = /** @class */ (function (_super) {
             if (block !== undefined && block !== null) {
                 var height = block.offsetHeight;
                 this.heightsOfInvisibleBackBlocks.push(height);
-                this.heightOfInvisibleBackChildren += height;
             }
         }
         for (var blockId = this.state.childrenBlocksEndIndex; blockId < nextState.childrenBlocksEndIndex; ++blockId) {
             var height = this.heightsOfInvisibleBackBlocks.pop();
-            if (height !== undefined) {
-                this.heightOfInvisibleBackChildren -= height;
-            }
         }
     };
     ReactFinite.prototype.componentWillUnmount = function () {
@@ -163,8 +151,8 @@ var ReactFinite = /** @class */ (function (_super) {
         var blocks = [];
         var _a = this.state, childrenBlocksStartIndex = _a.childrenBlocksStartIndex, childrenBlocksEndIndex = _a.childrenBlocksEndIndex;
         var maxBlockId = Math.floor(allChildren.length / childrenBlockSize);
-        for (var blockId = Math.max(childrenBlocksStartIndex - 1, 0); blockId < Math.min(childrenBlocksEndIndex, maxBlockId + 1); ++blockId) {
-            blocks.push({ blockId: blockId, isInvisible: false, children: allChildren.slice(childrenBlockSize * blockId, childrenBlockSize * (blockId + 1)) });
+        for (var blockId = Math.max(childrenBlocksStartIndex, 0); blockId < Math.min(childrenBlocksEndIndex, maxBlockId + 1); ++blockId) {
+            blocks.push({ blockId: blockId, children: allChildren.slice(childrenBlockSize * blockId, childrenBlockSize * (blockId + 1)) });
         }
         return blocks;
     };
@@ -225,7 +213,7 @@ var Endpoint;
 
 function sample(array) { return array[Math.floor(array.length * Math.random())]; }
 var randomWord = function () {
-    var words = ["here", "are", "random", "words", "so", "many", "of", "them", "truly", "believe", "me", "about", "this"];
+    var words = ["here", "are", "the", "random", "words", "so", "many", "of", "them", "truly", "believe", "me", "about", "this"];
     return sample(words);
 };
 var createList = function (numberOfElement) {

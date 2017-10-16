@@ -55,11 +55,7 @@ export class ReactFinite extends React.Component<ReactFiniteProps, ReactFiniteSt
   }
 
   private heightsOfInvisibleFrontBlocks: number[] = []
-  private heightOfInvisibleFrontChildren: number = 0 // This is always the sum of the prev array, cached for performance
   private heightsOfInvisibleBackBlocks: number[] = [] // TODO: Initialize to some sensible value or let the user pass it
-  private heightOfInvisibleBackChildren: number = 0
-
-  private compensateHeight: number = 0
 
   componentWillUpdate(nextProps: ReactFiniteProps, nextState: ReactFiniteState) {
     // TODO: Deduplicate this code
@@ -68,15 +64,11 @@ export class ReactFinite extends React.Component<ReactFiniteProps, ReactFiniteSt
       if(block !== undefined && block !== null) {
         const height = block.offsetHeight
         this.heightsOfInvisibleFrontBlocks.push(height)
-        this.heightOfInvisibleFrontChildren += height
       }
     }
     for(let blockId = nextState.childrenBlocksStartIndex; blockId < this.state.childrenBlocksStartIndex; ++blockId) {
       const height = this.heightsOfInvisibleFrontBlocks.pop()
-      if(height !== undefined) {
-        this.heightOfInvisibleFrontChildren -= height
-        this.compensateHeight += height
-      } else {
+      if(height === undefined) {
         throw new Error("The previous block height must be known")
       }
     }
@@ -85,14 +77,10 @@ export class ReactFinite extends React.Component<ReactFiniteProps, ReactFiniteSt
       if(block !== undefined && block !== null) {
         const height = block.offsetHeight
         this.heightsOfInvisibleBackBlocks.push(height)
-        this.heightOfInvisibleBackChildren += height
       }
     }
     for(let blockId = this.state.childrenBlocksEndIndex; blockId < nextState.childrenBlocksEndIndex; ++blockId) {
       const height = this.heightsOfInvisibleBackBlocks.pop()
-      if(height !== undefined) {
-        this.heightOfInvisibleBackChildren -= height
-      }
     }
   }
 
@@ -113,8 +101,8 @@ export class ReactFinite extends React.Component<ReactFiniteProps, ReactFiniteSt
 
     const { childrenBlocksStartIndex, childrenBlocksEndIndex } = this.state
     const maxBlockId = Math.floor(allChildren.length / childrenBlockSize)
-    for(let blockId = Math.max(childrenBlocksStartIndex-1,0); blockId < Math.min(childrenBlocksEndIndex, maxBlockId+1); ++blockId) {
-      blocks.push({ blockId, isInvisible: false as false, children: allChildren.slice(childrenBlockSize*blockId, childrenBlockSize*(blockId+1)) })
+    for(let blockId = Math.max(childrenBlocksStartIndex,0); blockId < Math.min(childrenBlocksEndIndex, maxBlockId+1); ++blockId) {
+      blocks.push({ blockId, children: allChildren.slice(childrenBlockSize*blockId, childrenBlockSize*(blockId+1)) })
     }
     return blocks
   }
