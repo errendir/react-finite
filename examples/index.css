@@ -1,0 +1,53 @@
+body {
+  margin: 0px;
+  padding: 10px;
+  font-size: 20pt;
+  width: 100vw;
+  height: 100vh;
+  box-sizing: border-box;
+}
+
+.topGrid {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  grid-template-columns: 1fr;
+  grid-template-areas: 
+    "header"
+    "content"
+}
+
+.header {
+  grid-area: header;
+}
+
+.content {
+  grid-area: content;
+  align-self: stretch;
+  justify-self: stretch;
+  min-height: 0; /* Or overflow: hidden; */
+}
+
+.list {
+  width: 400px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.listElement {
+  width: 100%;
+  background: #FFF;
+}
+
+.listEven {
+  background: #FFF;
+}
+
+.listOdd {
+  background: #CCC;
+}
+
+/* .listElement:nth-child(2n+1) {
+  background: #EEE;
+} */
