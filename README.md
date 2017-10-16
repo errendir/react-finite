@@ -1,6 +1,6 @@
 ## ReactFinite
 
-React finite is a simple React component leveraging the power of the IntersectionObserver API to reduce the number of the DOM elements your React app renders.
+React finite is a simple React component leveraging the power of the IntersectionObserver API to reduce the number of the DOM elements your React app renders. You can find an example [here](https://errendir.github.io/react-finite/).
 
 Usage:
 ```
