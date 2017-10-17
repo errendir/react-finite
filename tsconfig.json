@@ -5,6 +5,8 @@
     "jsx": "react",
     "noImplicitAny": true,
     "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "strictNullChecks": true,
     "lib": [ "dom", "es5", "scripthost", "es2015", "es2016.array.include", "es2017.object" ]
   }

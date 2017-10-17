@@ -57,7 +57,7 @@ export class ReactFinite extends React.Component<ReactFiniteProps, ReactFiniteSt
   private heightsOfInvisibleFrontBlocks: number[] = []
   private heightsOfInvisibleBackBlocks: number[] = [] // TODO: Initialize to some sensible value or let the user pass it
 
-  componentWillUpdate(nextProps: ReactFiniteProps, nextState: ReactFiniteState) {
+  componentWillUpdate(_nextProps: ReactFiniteProps, nextState: ReactFiniteState) {
     // TODO: Deduplicate this code
     for(let blockId = this.state.childrenBlocksStartIndex; blockId < nextState.childrenBlocksStartIndex; ++blockId) {
       const block = this.blocksByBlockId[blockId]
@@ -80,7 +80,7 @@ export class ReactFinite extends React.Component<ReactFiniteProps, ReactFiniteSt
       }
     }
     for(let blockId = this.state.childrenBlocksEndIndex; blockId < nextState.childrenBlocksEndIndex; ++blockId) {
-      const height = this.heightsOfInvisibleBackBlocks.pop()
+      this.heightsOfInvisibleBackBlocks.pop()
     }
   }
 
@@ -202,8 +202,6 @@ export class ReactFinite extends React.Component<ReactFiniteProps, ReactFiniteSt
       }
     }
   }
-
-  private expandingEndpoint: Endpoint | null = null
 
   private scheduleEndpointExpansion(endpoint: Endpoint) {
     if(endpoint === Endpoint.Front) {
