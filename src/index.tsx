@@ -109,37 +109,34 @@ export class ReactFinite extends React.Component<ReactFiniteProps, ReactFiniteSt
 
   render() {
     const blocks = this.getChildrenBlocks()
-    const scrollContentStyle = {
-      display: "grid", gridTemplateColumns: "1fr", gridTemplateRows: "auto 1fr auto"
-    }
 
     return <div ref={container => this.container = container} style={this.props.style} className={this.props.className}>
-      <div ref={scrollContent => this.scrollContent = scrollContent} style={scrollContentStyle}>
+      <div ref={scrollContent => this.scrollContent = scrollContent}>
         {this.renderFrontPadding()}
-        <div style={{ gridRow: "2/3", gridColumn: "1/2" }}>
+        <div style={{ position: "relative" }}>
           {blocks.map(block =>
             <div key={block.blockId} ref={blockElement => this.blocksByBlockId[block.blockId] = blockElement}>
               {block.children}
             </div>
           )}
+          {/* Bumpers are rendered at the end to ensure they are rendered on top of the other content */}
+          {this.renderBackBumper()}
+          {this.renderFrontBumper()}
         </div>
         {this.renderBackPadding()}
 
-        {/* Bumpers are rendered at the end to ensure they are rendered on top of the other content */}
-        {this.renderBackBumper()}
-        {this.renderFrontBumper()}
       </div>
     </div>
   }
 
   private renderFrontPadding() {
-    return <div style={{ gridRow: "1/2", gridColumn: "1/2" }}>
+    return <div>
       {this.heightsOfInvisibleFrontBlocks.map((height, id) => <div key={id} style={{ height: height }} />)}
     </div>
   }
 
   private renderBackPadding() {
-    return <div style={{ gridRow: "3/4", gridColumn: "1/2" }}>
+    return <div>
       {this.heightsOfInvisibleBackBlocks.map((height, id) => <div key={id} style={{ height: height }} />)}
     </div>
   }
@@ -152,7 +149,7 @@ export class ReactFinite extends React.Component<ReactFiniteProps, ReactFiniteSt
     return {
       height: safetyMarginInPixels,
       width: "100%",
-      gridRow: "2/3", gridColumn: "1/2",
+      position: "absolute" as "absolute",
       // It's important bumpers don't have z-index - I believe this is what messes the scrollTop behaviour
       backgroundColor: this.props.debug ? "hsla(270, 50%, 40%, 0.3)" : undefined,
     }
@@ -160,7 +157,7 @@ export class ReactFinite extends React.Component<ReactFiniteProps, ReactFiniteSt
 
   private renderFrontBumper() {
     const style = {
-      alignSelf: "start" as any,
+      top: "0px",
       ...this.getBumperStyle(),
     }
     return <div ref={frontBumper => this.frontBumper = frontBumper} style={style} />
@@ -168,7 +165,7 @@ export class ReactFinite extends React.Component<ReactFiniteProps, ReactFiniteSt
 
   private renderBackBumper() {
     const style = {
-      alignSelf: "end" as any,
+      bottom: "0px",
       ...this.getBumperStyle(),
     }
     return <div ref={backBumper => this.backBumper = backBumper} style={style} />

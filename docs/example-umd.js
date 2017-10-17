@@ -54,7 +54,7 @@ var ReactFinite = /** @class */ (function (_super) {
             return {
                 height: safetyMarginInPixels,
                 width: "100%",
-                gridRow: "2/3", gridColumn: "1/2",
+                position: "absolute",
                 // It's important bumpers don't have z-index - I believe this is what messes the scrollTop behaviour
                 backgroundColor: _this.props.debug ? "hsla(270, 50%, 40%, 0.3)" : undefined
             };
@@ -89,7 +89,6 @@ var ReactFinite = /** @class */ (function (_super) {
                 }
             }
         };
-        _this.expandingEndpoint = null;
         _this.state = {
             childrenBlocksStartIndex: 0,
             childrenBlocksEndIndex: Math.max(Math.ceil((props.initialNumberOfDisplayedChildren || defaultInitialNumberOfDisplayedChildren) /
@@ -115,7 +114,7 @@ var ReactFinite = /** @class */ (function (_super) {
         });
         this.backObserver.observe(this.backBumper);
     };
-    ReactFinite.prototype.componentWillUpdate = function (nextProps, nextState) {
+    ReactFinite.prototype.componentWillUpdate = function (_nextProps, nextState) {
         // TODO: Deduplicate this code
         for (var blockId = this.state.childrenBlocksStartIndex; blockId < nextState.childrenBlocksStartIndex; ++blockId) {
             var block = this.blocksByBlockId[blockId];
@@ -138,7 +137,7 @@ var ReactFinite = /** @class */ (function (_super) {
             }
         }
         for (var blockId = this.state.childrenBlocksEndIndex; blockId < nextState.childrenBlocksEndIndex; ++blockId) {
-            var height = this.heightsOfInvisibleBackBlocks.pop();
+            this.heightsOfInvisibleBackBlocks.pop();
         }
     };
     ReactFinite.prototype.componentWillUnmount = function () {
@@ -159,33 +158,31 @@ var ReactFinite = /** @class */ (function (_super) {
     ReactFinite.prototype.render = function () {
         var _this = this;
         var blocks = this.getChildrenBlocks();
-        var scrollContentStyle = {
-            display: "grid", gridTemplateColumns: "1fr", gridTemplateRows: "auto 1fr auto"
-        };
         return React.createElement("div", { ref: function (container) { return _this.container = container; }, style: this.props.style, className: this.props.className },
-            React.createElement("div", { ref: function (scrollContent) { return _this.scrollContent = scrollContent; }, style: scrollContentStyle },
+            React.createElement("div", { ref: function (scrollContent) { return _this.scrollContent = scrollContent; } },
                 this.renderFrontPadding(),
-                React.createElement("div", { style: { gridRow: "2/3", gridColumn: "1/2" } }, blocks.map(function (block) {
-                    return React.createElement("div", { key: block.blockId, ref: function (blockElement) { return _this.blocksByBlockId[block.blockId] = blockElement; } }, block.children);
-                })),
-                this.renderBackPadding(),
-                this.renderBackBumper(),
-                this.renderFrontBumper()));
+                React.createElement("div", { style: { position: "relative" } },
+                    blocks.map(function (block) {
+                        return React.createElement("div", { key: block.blockId, ref: function (blockElement) { return _this.blocksByBlockId[block.blockId] = blockElement; } }, block.children);
+                    }),
+                    this.renderBackBumper(),
+                    this.renderFrontBumper()),
+                this.renderBackPadding()));
     };
     ReactFinite.prototype.renderFrontPadding = function () {
-        return React.createElement("div", { style: { gridRow: "1/2", gridColumn: "1/2" } }, this.heightsOfInvisibleFrontBlocks.map(function (height, id) { return React.createElement("div", { key: id, style: { height: height } }); }));
+        return React.createElement("div", null, this.heightsOfInvisibleFrontBlocks.map(function (height, id) { return React.createElement("div", { key: id, style: { height: height } }); }));
     };
     ReactFinite.prototype.renderBackPadding = function () {
-        return React.createElement("div", { style: { gridRow: "3/4", gridColumn: "1/2" } }, this.heightsOfInvisibleBackBlocks.map(function (height, id) { return React.createElement("div", { key: id, style: { height: height } }); }));
+        return React.createElement("div", null, this.heightsOfInvisibleBackBlocks.map(function (height, id) { return React.createElement("div", { key: id, style: { height: height } }); }));
     };
     ReactFinite.prototype.renderFrontBumper = function () {
         var _this = this;
-        var style = __assign({ alignSelf: "start" }, this.getBumperStyle());
+        var style = __assign({ top: "0px" }, this.getBumperStyle());
         return React.createElement("div", { ref: function (frontBumper) { return _this.frontBumper = frontBumper; }, style: style });
     };
     ReactFinite.prototype.renderBackBumper = function () {
         var _this = this;
-        var style = __assign({ alignSelf: "end" }, this.getBumperStyle());
+        var style = __assign({ bottom: "0px" }, this.getBumperStyle());
         return React.createElement("div", { ref: function (backBumper) { return _this.backBumper = backBumper; }, style: style });
     };
     ReactFinite.prototype.scheduleEndpointExpansion = function (endpoint) {
@@ -223,11 +220,10 @@ var createList = function (numberOfElement) {
         return { text: Array.from(new Array(wordCount)).map(function (_) { return randomWord(); }).join(' ') };
     });
 };
-var list1 = createList(1000);
-var list2 = createList(1000);
+var list = createList(1000);
 // Example one: externally sized container
 ReactDOM.render(React.createElement(ReactFinite, { initialNumberOfDisplayedChildren: 20, safetyMarginInPixels: 600, useWindowForVisibilityDetection: false, className: "list" // Optional
-    , debug: false }, list1.map(function (listElement, i) {
+    , debug: false }, list.map(function (listElement, i) {
     return React.createElement("div", { key: i, className: "listElement " + (i % 2 === 0 ? "listEven" : "listOdd") },
         i,
         ": ",
@@ -235,7 +231,7 @@ ReactDOM.render(React.createElement(ReactFinite, { initialNumberOfDisplayedChild
 })), document.querySelector("#exampleOneRoot"));
 // Example two: window scrolling container
 ReactDOM.render(React.createElement(ReactFinite, { initialNumberOfDisplayedChildren: 20, safetyMarginInPixels: 600, useWindowForVisibilityDetection: true, className: "list" // Optional
-    , debug: false }, list1.map(function (listElement, i) {
+    , debug: false }, list.map(function (listElement, i) {
     return React.createElement("div", { key: i, className: "listElement " + (i % 2 === 0 ? "listEven" : "listOdd") },
         i,
         ": ",

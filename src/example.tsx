@@ -18,8 +18,7 @@ const createList = function(numberOfElement: number) {
   })
 
 }
-const list1 = createList(1000)
-const list2 = createList(1000)
+const list = createList(1000)
 
 // Example one: externally sized container
 ReactDOM.render(
@@ -30,7 +29,7 @@ ReactDOM.render(
     className="list" // Optional
     debug={false} // Don't set it to true in production
   >
-    {list1.map((listElement, i) => 
+    {list.map((listElement, i) => 
       <div key={i} className={`listElement ${i % 2 === 0 ? "listEven" : "listOdd"}`}>
         {i}: {listElement.text}
       </div>
@@ -48,7 +47,7 @@ ReactDOM.render(
     className="list" // Optional
     debug={false} // Don't set it to true in production
   >
-    {list1.map((listElement, i) => 
+    {list.map((listElement, i) => 
       <div key={i} className={`listElement ${i % 2 === 0 ? "listEven" : "listOdd"}`}>
         {i}: {listElement.text}
       </div>
