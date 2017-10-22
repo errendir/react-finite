@@ -10,12 +10,14 @@ interface ReactFiniteProps<T> {
   childrenBlockSize?: number
   debug?: boolean
 
-  // Alternative way 
+  // Alternative way to render child elements (avoids creating unneded elements)
   ElementComponent?: React.ComponentClass<T>
   elements?: T[]
+
+  estimatedElementHeightInPixels?: number
 }
 
-const defaultInitialNumberOfDisplayedChildren = 5
+const defaultInitialNumberOfDisplayedChildren = 50
 const defaultSafetyMarginInPixels = 600
 const defaultChildrenBlockSize = 19
 
@@ -101,7 +103,7 @@ export class ReactFinite<T> extends React.PureComponent<ReactFiniteProps<T>, Rea
     const { ElementComponent, elements } = this.props
 
     let getChildrenSlice: (start: number, end: number) => React.ReactNode[]
-    let numberOfChildren: number 
+    let numberOfChildren: number
 
     if(ElementComponent && elements) {
       getChildrenSlice = (start, end) => elements.slice(start, end).map(element => <ElementComponent {...element} />)
@@ -148,14 +150,41 @@ export class ReactFinite<T> extends React.PureComponent<ReactFiniteProps<T>, Rea
 
   private renderFrontPadding() {
     return <div>
-      {this.heightsOfInvisibleFrontBlocks.map((height, id) => <div key={id} style={{ height: height }} />)}
+      {this.heightsOfInvisibleFrontBlocks.map((height, id) => <div key={id} style={{ height }} />)}
     </div>
   }
 
   private renderBackPadding() {
+    const childrenBlockSize = this.props.childrenBlockSize || defaultChildrenBlockSize
+    const numberOfChildren = this.getNumberOfChildren()
+    //const lastBlockPadding = childrenBlockSize - (numberOfChildren % childrenBlockSize)
+    const noRemainingElements = Math.max(0, 
+      numberOfChildren - this.state.childrenBlocksEndIndex * childrenBlockSize
+    )
+
+    const estimatedElementHeightInPixels = 
+      (this.heightsOfInvisibleBackBlocks.length > 0 || this.heightsOfInvisibleFrontBlocks.length > 0)
+        ? (this.heightsOfInvisibleBackBlocks.reduce((a,b) => a+b, 0) + this.heightsOfInvisibleFrontBlocks.reduce((a,b) => a+b, 0))
+          / (this.heightsOfInvisibleBackBlocks.length + this.heightsOfInvisibleFrontBlocks.length)
+          / childrenBlockSize
+        : (this.props.estimatedElementHeightInPixels || 0)
+
     return <div>
-      {this.heightsOfInvisibleBackBlocks.map((height, id) => <div key={id} style={{ height: height }} />)}
+      {this.heightsOfInvisibleBackBlocks.map((height, id) => <div key={id} style={{ height }} />)}
+
+      { /* Add one div of large height to accomodate for all the remaining elements */ }
+      <div style={{ height: noRemainingElements * estimatedElementHeightInPixels }} />
     </div>
+  }
+
+  // TODO: this number doesn't need to be computed multiple times during one rendering
+  private getNumberOfChildren() {
+    const { ElementComponent, elements } = this.props
+    if(ElementComponent && elements) {
+      return elements.length
+    } else {
+      return React.Children.count(this.props.children)
+    }
   }
 
   private frontBumper: HTMLDivElement | null = null

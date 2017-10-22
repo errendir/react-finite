@@ -32,9 +32,10 @@ class Row extends React.PureComponent<{ index: number, text: string }> {
 ReactDOM.render(
   <ReactFinite 
     initialNumberOfDisplayedChildren={20}
-    safetyMarginInPixels={600} // Optional
-    useWindowForVisibilityDetection={false} // Optional
-    className="list" // Optional
+    safetyMarginInPixels={600}
+    estimatedElementHeightInPixels={40}
+    useWindowForVisibilityDetection={false}
+    className="list"
     debug={false} // Don't set it to true in production
 
     elements={list}
@@ -47,9 +48,10 @@ ReactDOM.render(
 ReactDOM.render(
   <ReactFinite 
     initialNumberOfDisplayedChildren={20}
-    safetyMarginInPixels={600} // Optional
-    useWindowForVisibilityDetection={true} // Optional
-    className="list" // Optional
+    safetyMarginInPixels={600}
+    estimatedElementHeightInPixels={40}
+    useWindowForVisibilityDetection={true}
+    className="list"
     debug={false} // Don't set it to true in production
   >
     {

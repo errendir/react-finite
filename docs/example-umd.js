@@ -35,7 +35,7 @@ var __assign = Object.assign || function __assign(t) {
     return t;
 };
 
-var defaultInitialNumberOfDisplayedChildren = 5;
+var defaultInitialNumberOfDisplayedChildren = 50;
 var defaultSafetyMarginInPixels = 600;
 var defaultChildrenBlockSize = 19;
 var ReactFinite = /** @class */ (function (_super) {
@@ -184,7 +184,28 @@ var ReactFinite = /** @class */ (function (_super) {
         return React.createElement("div", null, this.heightsOfInvisibleFrontBlocks.map(function (height, id) { return React.createElement("div", { key: id, style: { height: height } }); }));
     };
     ReactFinite.prototype.renderBackPadding = function () {
-        return React.createElement("div", null, this.heightsOfInvisibleBackBlocks.map(function (height, id) { return React.createElement("div", { key: id, style: { height: height } }); }));
+        var childrenBlockSize = this.props.childrenBlockSize || defaultChildrenBlockSize;
+        var numberOfChildren = this.getNumberOfChildren();
+        //const lastBlockPadding = childrenBlockSize - (numberOfChildren % childrenBlockSize)
+        var noRemainingElements = Math.max(0, numberOfChildren - this.state.childrenBlocksEndIndex * childrenBlockSize);
+        var estimatedElementHeightInPixels = (this.heightsOfInvisibleBackBlocks.length > 0 || this.heightsOfInvisibleFrontBlocks.length > 0)
+            ? (this.heightsOfInvisibleBackBlocks.reduce(function (a, b) { return a + b; }, 0) + this.heightsOfInvisibleFrontBlocks.reduce(function (a, b) { return a + b; }, 0))
+                / (this.heightsOfInvisibleBackBlocks.length + this.heightsOfInvisibleFrontBlocks.length)
+                / childrenBlockSize
+            : (this.props.estimatedElementHeightInPixels || 0);
+        return React.createElement("div", null,
+            this.heightsOfInvisibleBackBlocks.map(function (height, id) { return React.createElement("div", { key: id, style: { height: height } }); }),
+            React.createElement("div", { style: { height: noRemainingElements * estimatedElementHeightInPixels } }));
+    };
+    // TODO: this number doesn't need to be computed multiple times during one rendering
+    ReactFinite.prototype.getNumberOfChildren = function () {
+        var _a = this.props, ElementComponent = _a.ElementComponent, elements = _a.elements;
+        if (ElementComponent && elements) {
+            return elements.length;
+        }
+        else {
+            return React.Children.count(this.props.children);
+        }
     };
     ReactFinite.prototype.renderFrontBumper = function () {
         var _this = this;
@@ -246,10 +267,8 @@ var Row = /** @class */ (function (_super) {
     return Row;
 }(React.PureComponent));
 // Example one: externally sized container
-ReactDOM.render(React.createElement(ReactFinite, { initialNumberOfDisplayedChildren: 20, safetyMarginInPixels: 600, useWindowForVisibilityDetection: false, className: "list" // Optional
-    , debug: false, elements: list, ElementComponent: Row }), document.querySelector("#exampleOneRoot"));
+ReactDOM.render(React.createElement(ReactFinite, { initialNumberOfDisplayedChildren: 20, safetyMarginInPixels: 600, estimatedElementHeightInPixels: 40, useWindowForVisibilityDetection: false, className: "list", debug: false, elements: list, ElementComponent: Row }), document.querySelector("#exampleOneRoot"));
 // Example two: window scrolling container
-ReactDOM.render(React.createElement(ReactFinite, { initialNumberOfDisplayedChildren: 20, safetyMarginInPixels: 600, useWindowForVisibilityDetection: true, className: "list" // Optional
-    , debug: false }, list.map(function (listElement) { return React.createElement(Row, __assign({}, listElement)); })), document.querySelector("#exampleTwoRoot"));
+ReactDOM.render(React.createElement(ReactFinite, { initialNumberOfDisplayedChildren: 20, safetyMarginInPixels: 600, estimatedElementHeightInPixels: 40, useWindowForVisibilityDetection: true, className: "list", debug: false }, list.map(function (listElement) { return React.createElement(Row, __assign({}, listElement)); })), document.querySelector("#exampleTwoRoot"));
 
 }(React,ReactDOM));
