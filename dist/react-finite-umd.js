@@ -148,13 +148,24 @@ var ReactFinite = /** @class */ (function (_super) {
         this.frontObserver.disconnect();
     };
     ReactFinite.prototype.getChildrenBlocks = function () {
-        var allChildren = React.Children.toArray(this.props.children);
+        var _a = this.props, ElementComponent = _a.ElementComponent, elements = _a.elements;
+        var getChildrenSlice;
+        var numberOfChildren;
+        if (ElementComponent && elements) {
+            getChildrenSlice = function (start, end) { return elements.slice(start, end).map(function (element) { return React.createElement(ElementComponent, __assign({}, element)); }); };
+            numberOfChildren = elements.length;
+        }
+        else {
+            var allChildren_1 = React.Children.toArray(this.props.children);
+            getChildrenSlice = function (start, end) { return allChildren_1.slice(start, end); };
+            numberOfChildren = allChildren_1.length;
+        }
         var childrenBlockSize = this.props.childrenBlockSize || defaultChildrenBlockSize;
+        var maxBlockId = Math.floor(numberOfChildren / childrenBlockSize);
         var blocks = [];
-        var _a = this.state, childrenBlocksStartIndex = _a.childrenBlocksStartIndex, childrenBlocksEndIndex = _a.childrenBlocksEndIndex;
-        var maxBlockId = Math.floor(allChildren.length / childrenBlockSize);
+        var _b = this.state, childrenBlocksStartIndex = _b.childrenBlocksStartIndex, childrenBlocksEndIndex = _b.childrenBlocksEndIndex;
         for (var blockId = Math.max(childrenBlocksStartIndex, 0); blockId < Math.min(childrenBlocksEndIndex, maxBlockId + 1); ++blockId) {
-            blocks.push({ blockId: blockId, children: allChildren.slice(childrenBlockSize * blockId, childrenBlockSize * (blockId + 1)) });
+            blocks.push({ blockId: blockId, children: getChildrenSlice(childrenBlockSize * blockId, childrenBlockSize * (blockId + 1)) });
         }
         return blocks;
     };
@@ -204,7 +215,7 @@ var ReactFinite = /** @class */ (function (_super) {
         }
     };
     return ReactFinite;
-}(React.Component));
+}(React.PureComponent));
 var Endpoint;
 (function (Endpoint) {
     Endpoint[Endpoint["Front"] = 0] = "Front";

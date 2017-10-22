@@ -1,6 +1,6 @@
 import * as React from 'react'
 
-interface ReactFiniteProps {
+interface ReactFiniteProps<T> {
   style?: object
   className?: string
 
@@ -9,6 +9,10 @@ interface ReactFiniteProps {
   safetyMarginInPixels?: number
   childrenBlockSize?: number
   debug?: boolean
+
+  // Alternative way 
+  ElementComponent?: React.ComponentClass<T>
+  elements?: T[]
 }
 
 const defaultInitialNumberOfDisplayedChildren = 5
@@ -20,8 +24,8 @@ interface ReactFiniteState {
   childrenBlocksEndIndex: number
 }
 
-export class ReactFinite extends React.Component<ReactFiniteProps, ReactFiniteState> {
-  constructor(props: ReactFiniteProps) {
+export class ReactFinite<T> extends React.PureComponent<ReactFiniteProps<T>, ReactFiniteState> {
+  constructor(props: ReactFiniteProps<T>) {
     super(props)
     this.state = {
       childrenBlocksStartIndex: 0,
@@ -57,7 +61,7 @@ export class ReactFinite extends React.Component<ReactFiniteProps, ReactFiniteSt
   private heightsOfInvisibleFrontBlocks: number[] = []
   private heightsOfInvisibleBackBlocks: number[] = [] // TODO: Initialize to some sensible value or let the user pass it
 
-  componentWillUpdate(_nextProps: ReactFiniteProps, nextState: ReactFiniteState) {
+  componentWillUpdate(_nextProps: ReactFiniteProps<T>, nextState: ReactFiniteState) {
     // TODO: Deduplicate this code
     for(let blockId = this.state.childrenBlocksStartIndex; blockId < nextState.childrenBlocksStartIndex; ++blockId) {
       const block = this.blocksByBlockId[blockId]
@@ -94,15 +98,28 @@ export class ReactFinite extends React.Component<ReactFiniteProps, ReactFiniteSt
   private blocksByBlockId: { [blockId: number]: HTMLDivElement | null } = {}
 
   private getChildrenBlocks() {
-    const allChildren = React.Children.toArray(this.props.children)
+    const { ElementComponent, elements } = this.props
+
+    let getChildrenSlice: (start: number, end: number) => React.ReactNode[]
+    let numberOfChildren: number 
+
+    if(ElementComponent && elements) {
+      getChildrenSlice = (start, end) => elements.slice(start, end).map(element => <ElementComponent {...element} />)
+      numberOfChildren = elements.length
+    } else {
+      const allChildren = React.Children.toArray(this.props.children)
+      getChildrenSlice = (start, end) => allChildren.slice(start, end)
+      numberOfChildren = allChildren.length
+    }
     
     const childrenBlockSize = this.props.childrenBlockSize || defaultChildrenBlockSize
+    const maxBlockId = Math.floor(numberOfChildren / childrenBlockSize)
+  
     const blocks = []
 
     const { childrenBlocksStartIndex, childrenBlocksEndIndex } = this.state
-    const maxBlockId = Math.floor(allChildren.length / childrenBlockSize)
     for(let blockId = Math.max(childrenBlocksStartIndex,0); blockId < Math.min(childrenBlocksEndIndex, maxBlockId+1); ++blockId) {
-      blocks.push({ blockId, children: allChildren.slice(childrenBlockSize*blockId, childrenBlockSize*(blockId+1)) })
+      blocks.push({ blockId, children: getChildrenSlice(childrenBlockSize*blockId, childrenBlockSize*(blockId+1)) })
     }
     return blocks
   }

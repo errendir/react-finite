@@ -145,13 +145,24 @@ var ReactFinite = /** @class */ (function (_super) {
         this.frontObserver.disconnect();
     };
     ReactFinite.prototype.getChildrenBlocks = function () {
-        var allChildren = React.Children.toArray(this.props.children);
+        var _a = this.props, ElementComponent = _a.ElementComponent, elements = _a.elements;
+        var getChildrenSlice;
+        var numberOfChildren;
+        if (ElementComponent && elements) {
+            getChildrenSlice = function (start, end) { return elements.slice(start, end).map(function (element) { return React.createElement(ElementComponent, __assign({}, element)); }); };
+            numberOfChildren = elements.length;
+        }
+        else {
+            var allChildren_1 = React.Children.toArray(this.props.children);
+            getChildrenSlice = function (start, end) { return allChildren_1.slice(start, end); };
+            numberOfChildren = allChildren_1.length;
+        }
         var childrenBlockSize = this.props.childrenBlockSize || defaultChildrenBlockSize;
+        var maxBlockId = Math.floor(numberOfChildren / childrenBlockSize);
         var blocks = [];
-        var _a = this.state, childrenBlocksStartIndex = _a.childrenBlocksStartIndex, childrenBlocksEndIndex = _a.childrenBlocksEndIndex;
-        var maxBlockId = Math.floor(allChildren.length / childrenBlockSize);
+        var _b = this.state, childrenBlocksStartIndex = _b.childrenBlocksStartIndex, childrenBlocksEndIndex = _b.childrenBlocksEndIndex;
         for (var blockId = Math.max(childrenBlocksStartIndex, 0); blockId < Math.min(childrenBlocksEndIndex, maxBlockId + 1); ++blockId) {
-            blocks.push({ blockId: blockId, children: allChildren.slice(childrenBlockSize * blockId, childrenBlockSize * (blockId + 1)) });
+            blocks.push({ blockId: blockId, children: getChildrenSlice(childrenBlockSize * blockId, childrenBlockSize * (blockId + 1)) });
         }
         return blocks;
     };
@@ -201,7 +212,7 @@ var ReactFinite = /** @class */ (function (_super) {
         }
     };
     return ReactFinite;
-}(React.Component));
+}(React.PureComponent));
 var Endpoint;
 (function (Endpoint) {
     Endpoint[Endpoint["Front"] = 0] = "Front";
@@ -214,28 +225,31 @@ var randomWord = function () {
     return sample(words);
 };
 var createList = function (numberOfElement) {
-    return Array.from(new Array(numberOfElement)).map(function (_) {
+    return Array.from(new Array(numberOfElement)).map(function (_, i) {
         var allowedWordCounts = [2, 10, 30];
         var wordCount = sample(allowedWordCounts);
-        return { text: Array.from(new Array(wordCount)).map(function (_) { return randomWord(); }).join(' ') };
+        return { key: i, index: i, text: Array.from(new Array(wordCount)).map(function (_) { return randomWord(); }).join(' ') };
     });
 };
 var list = createList(1000);
+var Row = /** @class */ (function (_super) {
+    __extends(Row, _super);
+    function Row() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Row.prototype.render = function () {
+        return React.createElement("div", { className: "listElement " + (this.props.index % 2 === 0 ? "listEven" : "listOdd") },
+            this.props.index,
+            ": ",
+            this.props.text);
+    };
+    return Row;
+}(React.PureComponent));
 // Example one: externally sized container
 ReactDOM.render(React.createElement(ReactFinite, { initialNumberOfDisplayedChildren: 20, safetyMarginInPixels: 600, useWindowForVisibilityDetection: false, className: "list" // Optional
-    , debug: false }, list.map(function (listElement, i) {
-    return React.createElement("div", { key: i, className: "listElement " + (i % 2 === 0 ? "listEven" : "listOdd") },
-        i,
-        ": ",
-        listElement.text);
-})), document.querySelector("#exampleOneRoot"));
+    , debug: false, elements: list, ElementComponent: Row }), document.querySelector("#exampleOneRoot"));
 // Example two: window scrolling container
 ReactDOM.render(React.createElement(ReactFinite, { initialNumberOfDisplayedChildren: 20, safetyMarginInPixels: 600, useWindowForVisibilityDetection: true, className: "list" // Optional
-    , debug: false }, list.map(function (listElement, i) {
-    return React.createElement("div", { key: i, className: "listElement " + (i % 2 === 0 ? "listEven" : "listOdd") },
-        i,
-        ": ",
-        listElement.text);
-})), document.querySelector("#exampleTwoRoot"));
+    , debug: false }, list.map(function (listElement) { return React.createElement(Row, __assign({}, listElement)); })), document.querySelector("#exampleTwoRoot"));
 
 }(React,ReactDOM));
